@@ -1,9 +1,6 @@
 package com.example.tp7dai;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
-import android.icu.util.LocaleData;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -11,8 +8,6 @@ import android.view.WindowManager;
 
 import org.cocos2d.actions.interval.IntervalAction;
 import org.cocos2d.actions.interval.MoveBy;
-import org.cocos2d.actions.interval.MoveTo;
-import org.cocos2d.actions.interval.RotateTo;
 import org.cocos2d.actions.interval.ScaleBy;
 import org.cocos2d.actions.interval.Sequence;
 import org.cocos2d.layers.Layer;
@@ -25,7 +20,6 @@ import org.cocos2d.opengl.CCGLSurfaceView;
 import org.cocos2d.types.CCPoint;
 import org.cocos2d.types.CCSize;
 
-import java.util.Queue;
 import java.util.Random;
 
 public class ActividadPrincipal extends Activity {
@@ -56,7 +50,7 @@ public class ActividadPrincipal extends Activity {
         CCGLSurfaceView _VistaDelJuego;
         CCSize _Pantalla;
         Sprite _Jugador;
-        Sprite _Enemigo;
+        Sprite _Pelota;
         Sprite _ImagenFondo;
         boolean _EstaTocandoAlJugador;
         boolean _EstaTocandoAlEnemigo;
@@ -255,7 +249,7 @@ public class ActividadPrincipal extends Activity {
                 ponerImagenFondo();
 
                 Log.d("CapaJuego", "Voy a ubicar el enemigo");
-                ponerUneEnemigo();
+                ponerPelota();
 
                 Log.d("CapaJuego", "inicio el verificador de colisiones");
                 super.schedule("detectarColisiones", 0.25f);
@@ -267,31 +261,20 @@ public class ActividadPrincipal extends Activity {
             // me falta que aparezca en una posicion random
             void ponerJugador(){
                 Log.d("PonerJugador", "Le asigno la imagen grafica al Sprite del jugador");
-                _Jugador = Sprite.sprite("jugador.png");
+                _Jugador = Sprite.sprite("barra.png");
 
                 Log.d("PonerJugador", "declaro la posicion incial");
                 CCPoint posicionInicial;
                 posicionInicial = new CCPoint();
 
-                Log.d("PonerJugador", "determino la posicion x al azar");
-                Random generadorDeAzar;
-                generadorDeAzar = new Random();
-                float anchoJugador;
-                anchoJugador = _Jugador.getWidth();
-                posicionInicial.x = generadorDeAzar.nextInt((int)(_Pantalla.getWidth()-anchoJugador));
-                posicionInicial.x += anchoJugador/2;
+                posicionInicial.x = 250;
+                posicionInicial.y = 200;
 
 
-                Log.d("PonerJugador", "determino la posicion y al azar");
-                Random generadorDeAzar2;
-                generadorDeAzar2 = new Random();
-                float altoJugador;
-                altoJugador = _Jugador.getHeight();
-                posicionInicial.y = generadorDeAzar2.nextInt((int)(_Pantalla.getHeight()-altoJugador));
-                posicionInicial.y += altoJugador/2;
-
-                Log.d("PonerEnemigo", "ubico el sprite");
+                Log.d("PonerJugador", "ubico el sprite");
                 _Jugador.setPosition(posicionInicial.x,posicionInicial.y);
+
+                _Jugador.runAction(ScaleBy.action(0.01f,2,2));
 
                 Log.d("PonerJugador", "Lo agrego a la capa");
                 super.addChild(_Jugador,10);
@@ -305,44 +288,30 @@ public class ActividadPrincipal extends Activity {
 
 
             // me falta que aparezca en una posicion random
-            void ponerUneEnemigo(){
-                Log.d("PonerEnemigo", "Voy a armar el sprite del enemigo");
-                _Enemigo =Sprite.sprite("manitofacebook.png");
+            void ponerPelota(){
+                Log.d("PonerPelota", "Voy a armar el sprite de la pelota");
+                _Pelota =Sprite.sprite("pelota.png");
 
                 Log.d("PonerEnemigo", "declaro la posicion incial");
                 CCPoint posicionInicial;
                 posicionInicial = new CCPoint();
 
-                Log.d("PonerEnemigo", "determino la posicion x al azar");
-                Random generadorDeAzar;
-                generadorDeAzar = new Random();
-                float anchoEnemigo;
-                anchoEnemigo = _Enemigo.getWidth();
-                posicionInicial.x = generadorDeAzar.nextInt((int)(_Pantalla.getWidth()-anchoEnemigo));
-                posicionInicial.x += anchoEnemigo/2;
-
-
-                Log.d("PonerEnemigo", "determino la posicion y al azar");
-                Random generadorDeAzar2;
-                generadorDeAzar2 = new Random();
-                float altoEnemigo;
-                altoEnemigo = _Enemigo.getHeight();
-                posicionInicial.y = generadorDeAzar2.nextInt((int)(_Pantalla.getHeight()-altoEnemigo));
-                posicionInicial.y += altoEnemigo/2;
+                posicionInicial.x = 250;
+                posicionInicial.y = 230;
 
 
 
                 Log.d("PonerEnemigo", "ubico el sprite");
-                _Enemigo.setPosition(posicionInicial.x,posicionInicial.y);
+                _Pelota.setPosition(posicionInicial.x,posicionInicial.y);
+
+                _Pelota.runAction(ScaleBy.action(0.01f,2,2));
 
                 Log.d("PonerEnemigo", "lo agrego a la capa");
-                super.addChild(_Enemigo,10);
+                super.addChild(_Pelota,10);
 
             }
 
-            // cuando esta tocando al sprite hago un else if si hay interseccion y
-            // llama al mover del otro sprite para que haga el cuadrado
-            // y ovbiamente su respectiva funcion que haga que se muevan
+
 
 
             @Override
@@ -359,7 +328,7 @@ public class ActividadPrincipal extends Activity {
                     _EstaTocandoAlJugador = false;
                 }
 
-                if (InterseccionEntrePuntoySprite(_Enemigo,xTocada,yTocada)){
+                if (InterseccionEntrePuntoySprite(_Pelota,xTocada,yTocada)){
                     moverenemigo(xTocada,yTocada);
                     _EstaTocandoAlEnemigo = true;
                 }
@@ -403,7 +372,7 @@ public class ActividadPrincipal extends Activity {
 
             void moverenemigo (float xAMover, float yAmover){
                 Log.d("Mover Jugador", "Me piden que ubique en x:"+xAMover + " - Y: " + yAmover);
-                _Enemigo.setPosition(xAMover,yAmover);
+                _Pelota.setPosition(xAMover,yAmover);
             }
 
 
@@ -511,7 +480,7 @@ public class ActividadPrincipal extends Activity {
                 boolean huboColision;
                 huboColision = false;
 
-                if (InterseccionEntreSprites(_Jugador,_Enemigo)){
+                if (InterseccionEntreSprites(_Jugador, _Pelota)){
                     huboColision= true;
                 }
 
@@ -521,7 +490,7 @@ public class ActividadPrincipal extends Activity {
                 }
 
                 if (huboColision == true && _EstaTocandoAlJugador ){
-                    moverenuncuadrado(_Enemigo);
+                    moverenuncuadrado(_Pelota);
                 }
 
                 if (huboColision == true && _EstaTocandoAlEnemigo ){
@@ -626,7 +595,7 @@ public class ActividadPrincipal extends Activity {
             // me falta que aparezca en una posicion random
             void ponerUneEnemigo() {
                 Log.d("PonerEnemigo", "Voy a armar el sprite del enemigo");
-                _Enemigo = Sprite.sprite("manitofacebook.png");
+                _Pelota = Sprite.sprite("manitofacebook.png");
 
                 Log.d("PonerEnemigo", "declaro la posicion incial");
                 CCPoint posicionInicial;
@@ -636,7 +605,7 @@ public class ActividadPrincipal extends Activity {
                 Random generadorDeAzar;
                 generadorDeAzar = new Random();
                 float anchoEnemigo;
-                anchoEnemigo = _Enemigo.getWidth();
+                anchoEnemigo = _Pelota.getWidth();
                 posicionInicial.x = generadorDeAzar.nextInt((int) (_Pantalla.getWidth() - anchoEnemigo));
                 posicionInicial.x += anchoEnemigo / 2;
 
@@ -645,16 +614,16 @@ public class ActividadPrincipal extends Activity {
                 Random generadorDeAzar2;
                 generadorDeAzar2 = new Random();
                 float altoEnemigo;
-                altoEnemigo = _Enemigo.getHeight();
+                altoEnemigo = _Pelota.getHeight();
                 posicionInicial.y = generadorDeAzar2.nextInt((int) (_Pantalla.getHeight() - altoEnemigo));
                 posicionInicial.y += altoEnemigo / 2;
 
 
                 Log.d("PonerEnemigo", "ubico el sprite");
-                _Enemigo.setPosition(posicionInicial.x, posicionInicial.y);
+                _Pelota.setPosition(posicionInicial.x, posicionInicial.y);
 
                 Log.d("PonerEnemigo", "lo agrego a la capa");
-                super.addChild(_Enemigo, 10);
+                super.addChild(_Pelota, 10);
 
             }
 
