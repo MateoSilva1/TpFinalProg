@@ -53,7 +53,6 @@ public class ActividadPrincipal extends Activity {
         Sprite _Pelota;
         Sprite _ImagenFondo;
         boolean _EstaTocandoAlJugador;
-        boolean _EstaTocandoAlEnemigo;
 
         public  clsJuego(CCGLSurfaceView VistaDelJuego){
             Log.d("Bob", "Comienza el constructor de la clase");
@@ -251,6 +250,9 @@ public class ActividadPrincipal extends Activity {
                 Log.d("CapaJuego", "Voy a ubicar el enemigo");
                 ponerPelota();
 
+                Log.d("CapaJuego", "Voy a ubicar el limite izquierdo");
+                ponerlimiteizq();
+
                 Log.d("CapaJuego", "inicio el verificador de colisiones");
                 super.schedule("detectarColisiones", 0.25f);
 
@@ -274,12 +276,24 @@ public class ActividadPrincipal extends Activity {
                 Log.d("PonerJugador", "ubico el sprite");
                 _Jugador.setPosition(posicionInicial.x,posicionInicial.y);
 
-                _Jugador.runAction(ScaleBy.action(0.01f,2,2));
 
                 Log.d("PonerJugador", "Lo agrego a la capa");
-                super.addChild(_Jugador,10);
+                super.addChild(_Jugador,9);
             }
 
+            void ponerlimiteizq(){
+                Sprite LimiteIzq;
+                Log.d("PonerlimiteIZQ", "Le asigno la imagen grafica al Sprite del jugador");
+                LimiteIzq = Sprite.sprite("z.png");
+
+
+                Log.d("PonerlimiteIZQ", "ubico el sprite");
+                LimiteIzq.setPosition(100,_Pantalla.getHeight()/2);
+
+
+                Log.d("PonerlimiteIZQ", "Lo agrego a la capa");
+                super.addChild(LimiteIzq,11);
+            }
 
             void ponerImagenFondo() {
                 Log.d("PonerFondo", "Lo agrego a la capa");
@@ -304,14 +318,10 @@ public class ActividadPrincipal extends Activity {
                 Log.d("PonerEnemigo", "ubico el sprite");
                 _Pelota.setPosition(posicionInicial.x,posicionInicial.y);
 
-                _Pelota.runAction(ScaleBy.action(0.01f,2,2));
-
                 Log.d("PonerEnemigo", "lo agrego a la capa");
                 super.addChild(_Pelota,10);
 
             }
-
-
 
 
             @Override
@@ -321,19 +331,11 @@ public class ActividadPrincipal extends Activity {
                 yTocada= _Pantalla.getHeight() - event.getY();
                 Log.d("Control de toque", "Comienza toque: X:"+xTocada + " - Y: " + yTocada);
                 if (InterseccionEntrePuntoySprite(_Jugador,xTocada,yTocada)){
-                    moverjugador(xTocada,yTocada);
+                    moverjugador(xTocada);
                     _EstaTocandoAlJugador = true;
                 }
                 else{
                     _EstaTocandoAlJugador = false;
-                }
-
-                if (InterseccionEntrePuntoySprite(_Pelota,xTocada,yTocada)){
-                    moverenemigo(xTocada,yTocada);
-                    _EstaTocandoAlEnemigo = true;
-                }
-                else{
-                    _EstaTocandoAlEnemigo = false;
                 }
 
                 return true;
@@ -346,10 +348,7 @@ public class ActividadPrincipal extends Activity {
                 yTocada= _Pantalla.getHeight() - event.getY();
                 Log.d("Control de toque", "Mueve toque: X:"+xTocada + " - Y: " + yTocada);
                 if (_EstaTocandoAlJugador){
-                    moverjugador(xTocada,yTocada);
-                }
-                if (_EstaTocandoAlEnemigo){
-                    moverenemigo(xTocada,yTocada);
+                    moverjugador(xTocada);
                 }
                 return true;
             }
@@ -360,20 +359,15 @@ public class ActividadPrincipal extends Activity {
                 xTocada= event.getX();
                 yTocada= _Pantalla.getHeight() - event.getY();
                 Log.d("Control de toque", "Mueve toque: X:"+xTocada + " - Y: " + yTocada);
-                _EstaTocandoAlEnemigo = false;
                 _EstaTocandoAlJugador = false;
                 return true;
             }
 
-            void moverjugador (float xAMover, float yAmover){
-                Log.d("Mover Jugador", "Me piden que ubique en x:"+xAMover + " - Y: " + yAmover);
-                _Jugador.setPosition(xAMover,yAmover);
+            void moverjugador (float xAMover){
+                Log.d("Mover Jugador", "Me piden que ubique en x:"+xAMover );
+                _Jugador.setPosition(xAMover,200);
             }
 
-            void moverenemigo (float xAMover, float yAmover){
-                Log.d("Mover Jugador", "Me piden que ubique en x:"+xAMover + " - Y: " + yAmover);
-                _Pelota.setPosition(xAMover,yAmover);
-            }
 
 
 
@@ -490,11 +484,6 @@ public class ActividadPrincipal extends Activity {
                 }
 
                 if (huboColision == true && _EstaTocandoAlJugador ){
-                    moverenuncuadrado(_Pelota);
-                }
-
-                if (huboColision == true && _EstaTocandoAlEnemigo ){
-                    moverenuncuadrado(_Jugador);
                 }
 
             }
