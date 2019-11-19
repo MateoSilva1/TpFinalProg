@@ -2,6 +2,7 @@ package com.example.tp7dai;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.WindowManager;
@@ -52,7 +53,17 @@ public class ActividadPrincipal extends Activity {
         Sprite _Jugador;
         Sprite _Pelota;
         Sprite _ImagenFondo;
+        Sprite _Bloque;
+        int ContadorFilaBloques = 0;
+        int ContadorBlquesxFila = 0;
+        int ContadorBloques = 0;
         boolean _EstaTocandoAlJugador;
+        boolean PrimeraVezQueTocaJugador =false;
+        //instancie x e y de los cuadrados como globales porque sino los pierdo y el bloque a
+        //poner
+        float x = 0;
+        float y = 0;
+        String BloqueAponer = "";
 
         public  clsJuego(CCGLSurfaceView VistaDelJuego){
             Log.d("Bob", "Comienza el constructor de la clase");
@@ -250,14 +261,25 @@ public class ActividadPrincipal extends Activity {
                 Log.d("CapaJuego", "Voy a ubicar el enemigo");
                 ponerPelota();
 
-                Log.d("CapaJuego", "Voy a ubicar el limite izquierdo");
-                ponerlimiteizq();
+                Log.d("CapaJuego", "Voy a ubicar los cuadrados");
+                //ponerCuadrados();
+                super.schedule("ponerCuadrados", 0.03f);
 
                 Log.d("CapaJuego", "inicio el verificador de colisiones");
-                super.schedule("detectarColisiones", 0.25f);
+                super.schedule("detectarColisiones", 0.1f);
 
                 Log.d("CapaJuego", "habilito el touch");
                 setIsTouchEnabled(true);
+
+                if(ContadorBloques == 49){
+                    super.unschedule("detectarColisiones");
+                }
+
+                if (PrimeraVezQueTocaJugador){
+                    //moverpelota
+                    Log.d("CapaJuego", "moverpelota");
+                    //super.schedule("moverpelota", 0.1f);
+                }
             }
 
             // me falta que aparezca en una posicion random
@@ -281,19 +303,6 @@ public class ActividadPrincipal extends Activity {
                 super.addChild(_Jugador,9);
             }
 
-            void ponerlimiteizq(){
-                Sprite LimiteIzq;
-                Log.d("PonerlimiteIZQ", "Le asigno la imagen grafica al Sprite del jugador");
-                LimiteIzq = Sprite.sprite("z.png");
-
-
-                Log.d("PonerlimiteIZQ", "ubico el sprite");
-                LimiteIzq.setPosition(100,_Pantalla.getHeight()/2);
-
-
-                Log.d("PonerlimiteIZQ", "Lo agrego a la capa");
-                super.addChild(LimiteIzq,11);
-            }
 
             void ponerImagenFondo() {
                 Log.d("PonerFondo", "Lo agrego a la capa");
@@ -306,26 +315,165 @@ public class ActividadPrincipal extends Activity {
                 Log.d("PonerPelota", "Voy a armar el sprite de la pelota");
                 _Pelota =Sprite.sprite("pelota.png");
 
-                Log.d("PonerEnemigo", "declaro la posicion incial");
+                Log.d("PonerPelota", "declaro la posicion incial");
                 CCPoint posicionInicial;
                 posicionInicial = new CCPoint();
 
                 posicionInicial.x = 250;
                 posicionInicial.y = 230;
 
-
-
-                Log.d("PonerEnemigo", "ubico el sprite");
+                Log.d("PonerPelota", "ubico el sprite");
                 _Pelota.setPosition(posicionInicial.x,posicionInicial.y);
 
-                Log.d("PonerEnemigo", "lo agrego a la capa");
+                Log.d("PonerPelota", "lo agrego a la capa");
                 super.addChild(_Pelota,10);
+
+            }
+
+            // me falta que aparezca en una posicion random
+            public void ponerCuadrados (float diferenciatiempo){
+
+                //podria haber iniciado los contadores en -1 pero no se si esta bien para este caso
+                //o si es solo en vectores.
+
+                //seteo los contadores e instancio la variable bloque a poner, ademas de
+                //las variables x e y (las saque porque las igualaba a 0 y como no eran globales
+                // se perdian los datos
+                ContadorBloques++;
+                ContadorBlquesxFila++;
+
+                //hago un switch para poder ir viendo que bloque voy poniendo y cada siete
+                //bloques sumo una fila (todo esto para poder setear sus determinados x e y).
+                //cada ves que cuento siete bloques "reinicio" el contadorxfila de bloques
+                //enrealidad no lo "reinicio" ya que si esta pasando por aca quiere decir
+                switch (ContadorBloques){
+                    case 1:
+                        BloqueAponer = "6";
+                        break;
+                    case 7:
+                        ContadorFilaBloques++;
+                        ContadorBlquesxFila=1;
+                        break;
+                    case 14:
+                        ContadorFilaBloques++;
+                        BloqueAponer = "5";
+                        ContadorBlquesxFila=1;
+                        break;
+                    case 21:
+                        ContadorFilaBloques++;
+                        ContadorBlquesxFila=1;
+                        break;
+                    case 28:
+                        ContadorFilaBloques++;
+                        BloqueAponer = "4";
+                        ContadorBlquesxFila=1;
+                        break;
+                    case 35:
+                        ContadorFilaBloques++;
+                        BloqueAponer = "3";
+                        ContadorBlquesxFila=1;
+                        break;
+                    case 42:
+                        ContadorFilaBloques++;
+                        BloqueAponer = "2";
+                        ContadorBlquesxFila=1;
+                        break;
+                    case 49:
+                        ContadorFilaBloques++;
+                        BloqueAponer = "1";
+                        ContadorBlquesxFila=1;
+                        break;
+
+                }
+
+
+                Log.d("ponerCuadrados", "Voy a armar el sprite de la pelota");
+                _Bloque =Sprite.sprite(BloqueAponer+".png");
+
+                //en este switch defino el x de las filas
+
+                switch (ContadorBlquesxFila){
+                    case 1:
+                        x = (_Bloque.getWidth()/2)+40 ;
+                        break;
+                    case 2:
+                        x =  2*(_Bloque.getWidth()/2) +125;
+                        break;
+                    case 3:
+                        x = 3*(_Bloque.getWidth()/2) +215;
+                        break;
+                    case 4:
+                        x =  4*(_Bloque.getWidth()/2) +300;
+                        break;
+                    case 5:
+                        x = 5*(_Bloque.getWidth()/2) +385;
+                        break;
+                    case 6:
+                        x = 6*(_Bloque.getWidth()/2) +470;
+                        break;
+                    case 7:
+                        x =  7*(_Bloque.getWidth()/2) +555;
+                        break;
+
+                }
+
+
+
+
+                //en este switch defino el y de las filas
+                //es igual al primer switch, lo tuve que hacer devuelta porque
+                //en el otro defino la imagen, y tiene que obviamente antes de ponersela
+                //al sprite, pero despues para setear las x e y necesito sacar el tamano
+                //del sprite del mismo, por ende tengo que tener antes definida la imagen.
+                //podria hacerlo en el primero, ya que se los valores x e y de los bloques
+                // y son siempre el mismo, pero no me deja muy comodo.
+                switch (ContadorBloques){
+                    case 1:
+                        y = _Pantalla.getHeight() - _Bloque.getHeight() -205;
+                        break;
+                    case 7:
+                        break;
+                    case 14:
+                        y = _Pantalla.getHeight() - 2*(_Bloque.getHeight()) -215;
+                        break;
+                    case 21:
+                        y = _Pantalla.getHeight() - 3*(_Bloque.getHeight()) -225;
+                        break;
+                    case 28:
+                        y = _Pantalla.getHeight() - 4*(_Bloque.getHeight()) -235;
+                        break;
+                    case 35:
+                        y = _Pantalla.getHeight() - 5*(_Bloque.getHeight()) -245;
+                        break;
+                    case 42:
+                        y = _Pantalla.getHeight() - 6*(_Bloque.getHeight()) -255;
+                        break;
+                    case 49:
+                        y = _Pantalla.getHeight() - 7*(_Bloque.getHeight()) -265;
+                        break;
+
+                }
+
+
+                Log.d("ponerCuadrados", "declaro la posicion incial");
+                CCPoint posicionInicial;
+                posicionInicial = new CCPoint();
+
+                posicionInicial.x = x;
+                posicionInicial.y = y;
+
+                Log.d("ponerCuadrados", "ubico el sprite");
+                _Bloque.setPosition(posicionInicial.x,posicionInicial.y);
+
+                Log.d("ponerCuadrados", "lo agrego a la capa");
+                super.addChild(_Bloque,13);
 
             }
 
 
             @Override
             public boolean ccTouchesBegan(MotionEvent event){
+
                 float xTocada, yTocada;
                 xTocada= event.getX();
                 yTocada= _Pantalla.getHeight() - event.getY();
@@ -333,6 +481,13 @@ public class ActividadPrincipal extends Activity {
                 if (InterseccionEntrePuntoySprite(_Jugador,xTocada,yTocada)){
                     moverjugador(xTocada);
                     _EstaTocandoAlJugador = true;
+
+                    if(PrimeraVezQueTocaJugador == false){
+                        PrimeraVezQueTocaJugador = true;
+                        //llamo funcion que activa el movimiento de la pelota
+                        moverenuncuadrado(_Pelota);
+                    }
+
                 }
                 else{
                     _EstaTocandoAlJugador = false;
@@ -386,6 +541,49 @@ public class ActividadPrincipal extends Activity {
                 Log.d("IntEntSpriteyPunto", "X: " +puntoXAVerificar+" - Y: " +puntoYAVerificar );
 
                 if(puntoXAVerificar >= SpIzquierda && puntoXAVerificar <= SpDerecha && puntoYAVerificar >= SpAbajo && puntoYAVerificar <= SpArriba) {
+                    HayInterseccion = true;
+                }
+
+                Log.d("IntEntSpriteyPunto", "Hay Interseccion " +HayInterseccion);
+
+                return HayInterseccion;
+            }
+
+          //con y se saca si toco arriba o abajo
+            public boolean InterseccionEntreYySprite(Sprite SpriteAVerificar, Float puntoYAVerificar) {
+                Boolean HayInterseccion=false;
+
+                //Determino los bordes de cada Sprite
+                Float SpArriba, SpAbajo, SpDerecha, SpIzquierda;
+                SpArriba=SpriteAVerificar.getPositionY() + SpriteAVerificar.getHeight()/2;
+                SpAbajo=SpriteAVerificar.getPositionY() - SpriteAVerificar.getHeight()/2;
+
+                Log.d("IntEntSpriteyPunto", "Sp Arr: " +SpArriba+" - Ab: " +SpAbajo );
+                Log.d("IntEntSpriteyPunto", "-Y: " +puntoYAVerificar );
+
+                if(puntoYAVerificar >= SpAbajo && puntoYAVerificar <= SpArriba) {
+                    HayInterseccion = true;
+                }
+
+                Log.d("IntEntSpriteyPunto", "Hay Interseccion " +HayInterseccion);
+
+                return HayInterseccion;
+            }
+
+            //con x se saca si toco izq o der
+            public boolean InterseccionEntreXySprite(Sprite SpriteAVerificar, Float
+                    puntoXAVerificar) {
+                Boolean HayInterseccion=false;
+
+                //Determino los bordes de cada Sprite
+                Float SpArriba, SpAbajo, SpDerecha, SpIzquierda;
+                SpDerecha=SpriteAVerificar.getPositionX() + SpriteAVerificar.getWidth()/2;
+                SpIzquierda=SpriteAVerificar.getPositionX() - SpriteAVerificar.getWidth()/2;
+
+                Log.d("IntEntSpriteyPunto", "- Der: " + SpDerecha +" - Izq: " + SpIzquierda);
+                Log.d("IntEntSpriteyPunto", "X: " +puntoXAVerificar+");
+
+                if(puntoXAVerificar >= SpIzquierda && puntoXAVerificar <= SpDerecha) {
                     HayInterseccion = true;
                 }
 
@@ -471,17 +669,36 @@ public class ActividadPrincipal extends Activity {
             public void detectarColisiones (float deltaTiempo) {
                 Log.d("DetectarColisiones", "Me fijo si algun enemigo choco al jugador");
 
-                boolean huboColision;
-                huboColision = false;
+                boolean huboColisionConJugador;
+                huboColisionConJugador = false;
+
+                boolean huboColisionConBloque;
+                huboColisionConBloque = false;
+
+                boolean huboColisionConBordeIzq;
+                huboColisionConBordeIzq = false;
+
+                boolean huboColisionConBordeDer;
+                huboColisionConBordeDer = false;
+
+                boolean huboColisionConBordeInf;
+                huboColisionConBordeInf = false;
+
+                boolean huboColisionConBordeSuo;
+                huboColisionConBordeSuo = false;
 
                 if (InterseccionEntreSprites(_Jugador, _Pelota)){
-                    huboColision= true;
+                    huboColisionConJugador= true;
+                }
+                if (InterseccionEntreSprites(_Bloque, _Pelota)){
+                    huboColisionConBloque= true;
                 }
 
-                if (huboColision == true){
+                if (huboColisionConJugador == true){
                     Log.d("DetectarColisiones", "Hubo una colision");
 
                 }
+
 
                 if (huboColision == true && _EstaTocandoAlJugador ){
                 }
